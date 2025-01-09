@@ -1,6 +1,8 @@
 package tictactoeserver.ui;
 
+import java.awt.Color;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -11,22 +13,18 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Font;
 
-public class Server extends FlowPane {
+public class DashBoard extends FlowPane {
 
     protected final HBox hBox;
-    protected final Button button;
-    protected final Region region;
-    protected final Button button0;
+    protected final Button btnController;
     protected final CategoryAxis categoryAxis;
     protected final NumberAxis numberAxis;
     protected final BarChart barChart;
 
-    public Server() {
+    public DashBoard() {
 
         hBox = new HBox();
-        button = new Button();
-        region = new Region();
-        button0 = new Button();
+        btnController = new Button();
         categoryAxis = new CategoryAxis();
         numberAxis = new NumberAxis();
         barChart = new BarChart(categoryAxis, numberAxis);
@@ -39,25 +37,16 @@ public class Server extends FlowPane {
         setPrefHeight(600.0);
         setPrefWidth(800.0);
 
-        hBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        hBox.setAlignment(javafx.geometry.Pos.CENTER);
         hBox.setPrefHeight(100.0);
         hBox.setPrefWidth(600.0);
 
-        button.setMnemonicParsing(false);
-        button.setPrefWidth(100.0);
-        button.setText("Start");
-        HBox.setMargin(button, new Insets(0.0, 0.0, 0.0, 100.0));
-        button.setFont(new Font(24.0));
-
-        HBox.setHgrow(region, javafx.scene.layout.Priority.ALWAYS);
-        region.setPrefHeight(1.0);
-        region.setPrefWidth(1.0);
-
-        button0.setMnemonicParsing(false);
-        button0.setPrefWidth(100.0);
-        button0.setText("Stop");
-        button0.setFont(new Font(24.0));
-        HBox.setMargin(button0, new Insets(0.0, 100.0, 0.0, 0.0));
+        btnController.setMnemonicParsing(false);
+        btnController.setPrefWidth(220);
+        btnController.setText("Start Server");
+        btnController.setFont(new Font(24.0));
+        btnController.setCursor(Cursor.HAND);
+        btnController.setStyle("-fx-background-color:green; -fx-text-fill: white");
 
         categoryAxis.setSide(javafx.geometry.Side.BOTTOM);
 
@@ -72,11 +61,9 @@ public class Server extends FlowPane {
         BarChart barChart = new BarChart(xAxis, yAxis);
         dataSeries1.getData().add(new XYChart.Data("Online", 2));
         dataSeries1.getData().add(new XYChart.Data("Offline", 5));
-         barChart.getData().add(dataSeries1);
+        barChart.getData().add(dataSeries1);
 
-        hBox.getChildren().add(button);
-        hBox.getChildren().add(region);
-        hBox.getChildren().add(button0);
+        hBox.getChildren().add(btnController);
         getChildren().add(hBox);
         getChildren().add(barChart);
 
