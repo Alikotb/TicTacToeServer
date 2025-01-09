@@ -1,4 +1,4 @@
-package tictactoeserver.ui;
+package tictactoeserver.view;
 
 import java.awt.Color;
 import javafx.geometry.Insets;
