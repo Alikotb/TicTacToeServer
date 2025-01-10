@@ -33,10 +33,9 @@ public class ClientHandler extends Thread {
             String response;
 
             switch (userAction.getAction()) {
-                /*
-                
-                        add action cases implementation here                 
-                */
+                case "signup":
+                    response = userDao.signup(userAction.getUser());
+                    break;
 
                 default:
                     response = "error, Invalid action...";
@@ -47,6 +46,8 @@ public class ClientHandler extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
 
+        } catch (SQLException ex) {
+            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 clientSocket.close();
