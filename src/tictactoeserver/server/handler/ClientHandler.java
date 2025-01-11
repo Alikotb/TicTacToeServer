@@ -33,7 +33,7 @@ public class ClientHandler extends Thread {
             String response;
 
             switch (userAction.getAction()) {
-                case "signup":
+                case 1 :
                     response = userDao.signup(userAction.getUser());
                     break;
 
@@ -42,6 +42,7 @@ public class ClientHandler extends Thread {
             }
 
             ps.println(gson.toJson(response));
+            ps.flush();
 
         } catch (IOException e) {
             e.printStackTrace();
