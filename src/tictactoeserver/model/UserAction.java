@@ -1,14 +1,14 @@
 package tictactoeserver.model;
 
 public class UserAction {
-    private String action;
+    private int action;
     private User user;
 
-    public String getAction() {
+    public int getAction() {
         return action;
     }
 
-    public void setAction(String action) {
+    public void setAction(int action) {
         this.action = action;
     }
 
