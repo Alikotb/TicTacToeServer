@@ -3,42 +3,33 @@ package tictactoeserver.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import tictactoeserver.server.handler.ClientHandler;
 
 public class Server {
-    private static final int PORT = 55555;
+
     private ServerSocket serverSocket;
-    
-    
+    private boolean isRunning = true;
+
     public void start() {
         try {
-            serverSocket = new ServerSocket(PORT);
-            System.out.println("Server is running on Port: " + PORT);
-
-            while (true) {
+            serverSocket = new ServerSocket(55555);
+            while (isRunning) {
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("Client connected >> " + clientSocket.getLocalSocketAddress());
-                new ClientHandler(clientSocket).start();
-                Thread.sleep(1000);
+                ClientHandler clientHandler = new ClientHandler(clientSocket);
+                clientHandler.start();
             }
         } catch (IOException e) {
-                e.printStackTrace();
-           
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-            
+                e.printStackTrace();  
         } finally {
             stop();
         }
     }
 
     public void stop() {
+        isRunning = false;
         if (serverSocket != null && !serverSocket.isClosed()) {
             try {
                 serverSocket.close();
-                System.out.println("Server socket closed.");
             } catch (IOException e) {
                 e.printStackTrace();
             }

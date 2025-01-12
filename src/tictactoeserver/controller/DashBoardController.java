@@ -1,11 +1,14 @@
 package tictactoeserver.controller;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import tictactoeserver.server.Server;
 import tictactoeserver.view.DashBoard;
 
-public class DashBoardController extends DashBoard{
+public class DashBoardController extends DashBoard {
+
     private Server server;
     private Thread serverThread;
     private boolean running;
@@ -29,12 +32,10 @@ public class DashBoardController extends DashBoard{
 
     private void startServer() {
         running = true;
-        serverThread = new Thread(() -> {  
-            System.out.println("Server Thread Started.");
+        serverThread = new Thread(() -> {
             server = new Server();
-            server.start(); 
+            server.start();
         });
-        serverThread.isDaemon();
         serverThread.start();
 
         Platform.runLater(() -> {
@@ -45,22 +46,15 @@ public class DashBoardController extends DashBoard{
 
     private void stopServer() {
         running = false;
-        if (server != null) {
+        if (serverThread != null && serverThread.isAlive()) {
             server.stop(); 
+            serverThread.stop();
         }
-        try {
-            serverThread.join();
-            System.out.println("Server Thread Stopped.");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+        
         Platform.runLater(() -> {
             btnController.setText("Restart Server");
             btnController.setStyle("-fx-background-color: orange;-fx-text-fill: white;");
         });
     }
-    
-    
-    
+
 }
