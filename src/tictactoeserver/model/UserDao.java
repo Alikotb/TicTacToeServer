@@ -10,6 +10,20 @@ public class UserDao {
     private static Connection con;
     private static PreparedStatement stmt;
     private static ResultSet result;
+    private static volatile UserDao instance;
+    
+    private UserDao(){}
+    
+   public static UserDao getInstance() {
+        if (instance == null) { 
+            synchronized (UserDao.class) {
+                if (instance == null) { 
+                    instance = new UserDao();
+                }
+            }
+        }
+        return instance;
+    }
 
     static {
         try {

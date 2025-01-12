@@ -1,60 +1,60 @@
 package tictactoeserver.server.handler;
 
-import com.google.gson.Gson;
 import java.io.*;
 import java.net.Socket;
-import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import tictactoeserver.model.UserAction;
+import javax.json.Json;
+import javax.json.JsonObject;
 import tictactoeserver.model.UserDao;
 
 public class ClientHandler extends Thread {
 
+    private static UserDao userDao = UserDao.getInstance();
+    private DataInputStream dis;
+    private DataOutputStream dos;
     private Socket clientSocket;
-    private UserDao userDao;
 
     public ClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
-        this.userDao = new UserDao();
+        try {
+            dis = new DataInputStream(clientSocket.getInputStream());
+            dos = new DataOutputStream(clientSocket.getOutputStream());
+        } catch (IOException ex) {
+            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
     }
 
     @Override
     public void run() {
         try {
-            DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
-            PrintStream ps = new PrintStream(clientSocket.getOutputStream());
+            String request = dis.readUTF();
+            JsonObject json = Json.createReader(new StringReader(request)).readObject();
+            int action = json.getInt("action");
 
-            String request = dis.readLine();
-            System.out.println("Received: " + request);
-
-            Gson gson = new Gson();
-            UserAction userAction = gson.fromJson(request, UserAction.class);
-            String response;
-
-            switch (userAction.getAction()) {
-                case 1 :
-                    response = userDao.signup(userAction.getUser());
+            switch (action) {
+                case 1:
                     break;
 
-                default:
-                    response = "error, Invalid action...";
             }
-
-            ps.println(gson.toJson(response));
-            ps.flush();
 
         } catch (IOException e) {
             e.printStackTrace();
-
-        } catch (SQLException ex) {
-            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                clientSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        }finally{
+            saveResources();
         }
     }
+
+    private void saveResources() {
+        try {
+            dis.close();
+            dos.close();
+            clientSocket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
 }
