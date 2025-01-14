@@ -29,6 +29,12 @@ public class User {
      this.password = password;
     }
 
+    public User(String username, int score) {
+        this.username = username;
+        this.score = score;
+    }
+    
+
     public int getScore() {
         return score;
     }
