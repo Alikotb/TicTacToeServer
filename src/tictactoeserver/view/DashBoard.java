@@ -20,6 +20,7 @@ public class DashBoard extends FlowPane {
     protected final CategoryAxis categoryAxis;
     protected final NumberAxis numberAxis;
     protected final BarChart barChart;
+    protected XYChart.Series dataSeries1;
 
     public DashBoard() {
 
@@ -53,14 +54,13 @@ public class DashBoard extends FlowPane {
         numberAxis.setSide(javafx.geometry.Side.LEFT);
         barChart.setPrefWidth(200.0);
 
-        XYChart.Series dataSeries1 = new XYChart.Series();
+        dataSeries1 = new XYChart.Series();
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel("USERS");
         NumberAxis yAxis = new NumberAxis();
         yAxis.setLabel("COUNT");
         BarChart barChart = new BarChart(xAxis, yAxis);
-        dataSeries1.getData().add(new XYChart.Data("Online", 2));
-        dataSeries1.getData().add(new XYChart.Data("Offline", 5));
+       
         barChart.getData().add(dataSeries1);
 
         hBox.getChildren().add(btnController);
