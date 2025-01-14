@@ -54,11 +54,11 @@ public class UserDao {
             if (user != null) {
                 user.setIsOnline(true);
                 user.setIsAvailable(true);
-                String updateQuery = "UPDATE USER_TABLE SET ISONLINE = ?, ISAVAILABLE = ? WHERE USERNAME = ?";
+                String updateQuery = "UPDATE USER_TABLE SET ISONLINE = ?, ISAVAILABLE = ? WHERE EMAIL = ?";
                 stmt = con.prepareStatement(updateQuery);
                 stmt.setBoolean(1, true);
                 stmt.setBoolean(2, true);
-                stmt.setString(3, user.getUsername());
+                stmt.setString(3, user.getEmail());
                 stmt.executeUpdate();
                 return user;
             } else {
@@ -71,9 +71,9 @@ public class UserDao {
     }
 
     private User getUser(User user) throws SQLException {
-        String loginQuery = "SELECT USERNAME, PASSWORD, SCORE FROM USER_TABLE WHERE USERNAME = ? AND PASSWORD = ?";
+        String loginQuery = "SELECT USERNAME, PASSWORD, SCORE FROM USER_TABLE WHERE EMAIL = ? AND PASSWORD = ?";
         stmt = con.prepareStatement(loginQuery);
-        stmt.setString(1, user.getUsername());
+        stmt.setString(1, user.getEmail());
         stmt.setString(2, user.getPassword());
         ResultSet result = stmt.executeQuery();
         if (result.next()) {
@@ -92,6 +92,25 @@ public class UserDao {
             
         }
         return null;
+    }
+     
+     public static int[] getOnlineUsers() {
+        int[] counter = {0, 0};
+        try {
+            stmt = con.prepareStatement("SELECT COUNT(*) FROM USER_TABLE WHERE ISONLINE = TRUE");
+            result = stmt.executeQuery();
+            if (result.next()) {
+                counter[0] = result.getInt(1);
+            }
+            stmt = con.prepareStatement("SELECT COUNT(*) FROM USER_TABLE WHERE ISONLINE = FALSE");
+            result = stmt.executeQuery();
+            if (result.next()) {
+                counter[1] = result.getInt(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return counter;
     }
      
      public int getScoreByEmail(String email) throws SQLException {
