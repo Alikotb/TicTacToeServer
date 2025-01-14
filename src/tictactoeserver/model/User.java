@@ -24,10 +24,16 @@ public class User {
     }
     
     
-    public User(String username,String password){
-     this.username = username;
+    public User(String email,String password){
+     this.email = email;
      this.password = password;
     }
+
+    public User(String username, int score) {
+        this.username = username;
+        this.score = score;
+    }
+    
 
     public int getScore() {
         return score;

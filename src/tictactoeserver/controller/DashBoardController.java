@@ -1,13 +1,17 @@
 package tictactoeserver.controller;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.scene.chart.XYChart;
 import javafx.stage.Stage;
+import tictactoeserver.model.User;
 import tictactoeserver.model.UserDao;
 import tictactoeserver.server.Server;
 import tictactoeserver.view.DashBoard;
+import tictactoeserver.server.handler.ClientHandler;
 
 public class DashBoardController extends DashBoard {
 
@@ -15,9 +19,11 @@ public class DashBoardController extends DashBoard {
     private Thread serverThread;
     private Thread updateChart;
     private boolean running;
+    private static ArrayList<User> availableUsers = new ArrayList();
+    UserDao uDao;
 
     public DashBoardController(Stage stage) {
-
+        uDao = UserDao.getInstance();
         btnController.setOnAction(e -> {
             if (!running) {
                 startServer();
@@ -47,7 +53,7 @@ public class DashBoardController extends DashBoard {
             btnController.setText("Stop Server");
             btnController.setStyle("-fx-background-color: red;-fx-text-fill: white;");
         });
-                startBarchart();
+        startBarchart();
 
     }
 
@@ -63,11 +69,14 @@ public class DashBoardController extends DashBoard {
             btnController.setStyle("-fx-background-color: orange;-fx-text-fill: white;");
         });
     }
+
     private void startBarchart() {
         int[] ar = {0, 0};
         updateChart = new Thread(() -> {
             while (true) {
                 try {
+                    availableUsers = uDao.getAvailableUsers();
+                    ClientHandler.getAvailableUsers();
                     ar[0] = UserDao.getOnlineUsers()[0];
                     ar[1] = UserDao.getOnlineUsers()[1];
                     Platform.runLater(() -> {
@@ -77,13 +86,14 @@ public class DashBoardController extends DashBoard {
 
                 } catch (InterruptedException ex) {
                     Logger.getLogger(DashBoardController.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(DashBoardController.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
         });
         updateChart.start();
     }
-
 
     public void updateGraph(int online, int offline) {
 
@@ -97,6 +107,10 @@ public class DashBoardController extends DashBoard {
         Platform.runLater(() -> {
             updateGraph(0, 0);
         });
+    }
+
+    public static ArrayList<User> getAvailableUsers() {
+        return availableUsers;
     }
 
 }
