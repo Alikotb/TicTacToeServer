@@ -2,6 +2,7 @@ package tictactoeserver.server.handler;
 
 import java.io.*;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
@@ -76,29 +77,34 @@ public class ClientHandler extends Thread {
     }
 
     private void handelLoginRequest(JsonObject json) throws IOException {
-        String username = json.getString("username");
-        String password = json.getString("password");
-
-        User user = new User(username, password);
-        User loggedInUser = userDao.updateUser(user);
-
-        if (loggedInUser != null) {
-            JsonObject response = Json.createObjectBuilder()
-                    .add("action", 2)
-                    .add("status", "success")
-                    .add("username", loggedInUser.getUsername())
-                    .add("password", loggedInUser.getPassword())
-                    .add("score", loggedInUser.getScore())
-                    .build();
-            dos.writeUTF(response.toString());
-        } else {
-            JsonObject errorResponse = Json.createObjectBuilder()
-                    .add("action", 2)
-                    .add("status", "failure")
-                    .add("message", "Invalid username or password")
-                    .build();
-            dos.writeUTF(errorResponse.toString());
-
+        try {
+            String email = json.getString("email");
+            String password = json.getString("password");
+            
+            User user = new User(email, password);
+            User loggedInUser = userDao.updateUser(user);
+            loggedInUser.setUsername(userDao.getUserNameByEmail(email));
+            loggedInUser.setScore(userDao.getScoreByEmail(email));
+            
+            if (loggedInUser != null) {
+                JsonObject response = Json.createObjectBuilder()
+                        .add("action", 2)
+                        .add("status", "success")
+                        .add("username", loggedInUser.getUsername())
+                        .add("score", loggedInUser.getScore())
+                        .build();
+                dos.writeUTF(response.toString());
+            } else {
+                JsonObject errorResponse = Json.createObjectBuilder()
+                        .add("action", 2)
+                        .add("status", "failure")
+                        .add("message", "Invalid username or password")
+                        .build();
+                dos.writeUTF(errorResponse.toString());
+                
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

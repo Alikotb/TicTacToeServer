@@ -51,10 +51,7 @@ public class UserDao {
 
     public User updateUser(User user) {
         try {
-
-            User currentUser = getUser(user);
-
-            if (currentUser != null) {
+            if (user != null) {
                 user.setIsOnline(true);
                 user.setIsAvailable(true);
                 String updateQuery = "UPDATE USER_TABLE SET ISONLINE = ?, ISAVAILABLE = ? WHERE USERNAME = ?";
@@ -83,6 +80,30 @@ public class UserDao {
             return user;
         }
         return null;
+    }
+    
+     public String getUserNameByEmail(String email) throws SQLException {
+        String loginQuery = "SELECT USERNAME FROM USER_TABLE WHERE EMAIL = ? ";
+        stmt = con.prepareStatement(loginQuery);
+        stmt.setString(1, email);
+        ResultSet result = stmt.executeQuery();
+        if (result.next()) {
+            return result.getString(1);
+            
+        }
+        return null;
+    }
+     
+     public int getScoreByEmail(String email) throws SQLException {
+        String loginQuery = "SELECT SCORE FROM USER_TABLE WHERE EMAIL = ? ";
+        stmt = con.prepareStatement(loginQuery);
+        stmt.setString(1, email);
+        ResultSet result = stmt.executeQuery();
+        if (result.next()) {
+             return result.getInt("SCORE");
+            
+        }
+        return 0;
     }
 
 }
