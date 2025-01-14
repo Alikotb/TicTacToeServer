@@ -37,6 +37,7 @@ public class ClientHandler extends Thread {
 
                 switch (action) {
                     case 1:
+                        handelSignupRequest(json);
                         break;
                     case 2:
                         handelLoginRequest(json);
@@ -47,6 +48,31 @@ public class ClientHandler extends Thread {
                 stop();
             }
         }
+    }
+
+    private void handelSignupRequest(JsonObject json) throws IOException {
+        String username = json.getString("username");
+        String email = json.getString("email");
+        String password = json.getString("password");
+        User user = new User(username, email, password);
+        boolean signupStatus = userDao.signup(user);
+
+        if (signupStatus) {
+            JsonObject response = Json.createObjectBuilder()
+                    .add("action", 1)
+                    .add("status", "success")
+                    .add("message", "Signed up successfully.")
+                    .build();
+            dos.writeUTF(response.toString());
+        } else {
+            JsonObject response = Json.createObjectBuilder()
+                    .add("action", 1)
+                    .add("status", "failure")
+                    .add("message", "Signup failed.")
+                    .build();
+            dos.writeUTF(response.toString());
+        }
+
     }
 
     private void handelLoginRequest(JsonObject json) throws IOException {
