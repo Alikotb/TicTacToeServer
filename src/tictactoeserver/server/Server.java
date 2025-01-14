@@ -12,6 +12,7 @@ public class Server {
 
     public void start() {
         try {
+            isRunning = true;
             serverSocket = new ServerSocket(55555);
             while (isRunning) {
                 Socket clientSocket = serverSocket.accept();

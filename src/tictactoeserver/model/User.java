@@ -16,6 +16,11 @@ public class User {
         this.isOnline = isOnline;
         this.isAvailable = isAvailable;
     }
+    
+    public User(String username,String password){
+     this.username = username;
+     this.password = password;
+    }
 
     public int getScore() {
         return score;

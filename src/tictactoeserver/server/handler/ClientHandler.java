@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonObject;
+import tictactoeserver.model.User;
 import tictactoeserver.model.UserDao;
 
 public class ClientHandler extends Thread {
@@ -28,21 +29,50 @@ public class ClientHandler extends Thread {
 
     @Override
     public void run() {
-        try {
-            String request = dis.readUTF();
-            JsonObject json = Json.createReader(new StringReader(request)).readObject();
-            int action = json.getInt("action");
+        while (true) {
+            try {
+                String request = dis.readUTF();
+                JsonObject json = Json.createReader(new StringReader(request)).readObject();
+                int action = json.getInt("action");
 
-            switch (action) {
-                case 1:
-                    break;
+                switch (action) {
+                    case 1:
+                        break;
+                    case 2:
+                        handelLoginRequest(json);
+                        break;
+                }
 
+            } catch (IOException e) {
+                stop();
             }
+        }
+    }
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally{
-            saveResources();
+    private void handelLoginRequest(JsonObject json) throws IOException {
+        String username = json.getString("username");
+        String password = json.getString("password");
+
+        User user = new User(username, password);
+        User loggedInUser = userDao.updateUser(user);
+
+        if (loggedInUser != null) {
+            JsonObject response = Json.createObjectBuilder()
+                    .add("action", 2)
+                    .add("status", "success")
+                    .add("username", loggedInUser.getUsername())
+                    .add("password", loggedInUser.getPassword())
+                    .add("score", loggedInUser.getScore())
+                    .build();
+            dos.writeUTF(response.toString());
+        } else {
+            JsonObject errorResponse = Json.createObjectBuilder()
+                    .add("action", 2)
+                    .add("status", "failure")
+                    .add("message", "Invalid username or password")
+                    .build();
+            dos.writeUTF(errorResponse.toString());
+
         }
     }
 
