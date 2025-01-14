@@ -37,6 +37,7 @@ public class DashBoardController extends DashBoard {
             server.start();
         });
         serverThread.start();
+        
 
         Platform.runLater(() -> {
             btnController.setText("Stop Server");
