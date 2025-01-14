@@ -116,7 +116,7 @@ public class ClientHandler extends Thread {
     
     public static void getAvailableUsers() throws IOException {
         JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-        for (User user : DashBoardController.getAvailableUsers()) {
+        for (User user : userDao.getAvailableUsers()) {
             JsonObject userJson = Json.createObjectBuilder()
                     .add("username", user.getUsername())
                     .add("score", user.getScore())
