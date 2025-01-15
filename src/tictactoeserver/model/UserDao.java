@@ -116,14 +116,14 @@ public class UserDao {
         return counter;
     }
 
-    public  ArrayList<User> getAvailableUsers() {
+    public ArrayList<User> getAvailableUsers() {
         ArrayList<User> users = new ArrayList();
         User user;
         try {
             stmt = con.prepareStatement("SELECT USERNAME,SCORE FROM USER_TABLE WHERE ISAVAILABLE = TRUE");
             result = stmt.executeQuery();
             while (result.next()) {
-                user = new User(result.getString("USERNAME"),result.getInt("SCORE"));
+                user = new User(result.getString("USERNAME"), result.getInt("SCORE"));
                 users.add(user);
             }
         } catch (SQLException ex) {
@@ -145,29 +145,29 @@ public class UserDao {
         return 0;
     }
 
-     
-      public String checkEmail(String email) throws SQLException {
+    public String checkEmail(String email) throws SQLException {
         String loginQuery = "SELECT EMAIL FROM USER_TABLE WHERE EMAIL = ? ";
         stmt = con.prepareStatement(loginQuery);
         stmt.setString(1, email);
         ResultSet result = stmt.executeQuery();
         if (result.next()) {
-             return result.getString(1);
-            
+            return result.getString(1);
+
         }
         return null;
     }
-     
-      public String checkPassword(String email) throws SQLException {
+
+    public String checkPassword(String email) throws SQLException {
         String loginQuery = "SELECT PASSWORD FROM USER_TABLE WHERE EMAIL = ? ";
         stmt = con.prepareStatement(loginQuery);
         stmt.setString(1, email);
         ResultSet result = stmt.executeQuery();
         if (result.next()) {
-             return result.getString("PASSWORD");
-            
+            return result.getString("PASSWORD");
+
         }
         return null;
+    }
 
     public void logOut(User user) {
         try {

@@ -53,16 +53,15 @@ public class ClientHandler extends Thread {
                     case 4: {
                         handleSendInvitationRequest(json);
                         break;
-                       case 6:
-                        handelLogout(json);
-                        break;
                     }
-
                     case 5: {
                         handleSendMove(json);
                         break;
                     }
-
+                    case 6: {
+                        handelLogout(json);
+                        break;
+                    }
 
                 }
 
@@ -120,12 +119,6 @@ public class ClientHandler extends Thread {
                 loggedInUser.setUsername(userDao.getUserNameByEmail(email));
                 loggedInUser.setScore(userDao.getScoreByEmail(email));
 
-            User user = new User(email, password);
-            User loggedInUser = userDao.updateUser(user);
-            loggedInUser.setUsername(userDao.getUserNameByEmail(email));
-            loggedInUser.setScore(userDao.getScoreByEmail(email));
-
-            if (loggedInUser != null) {
                 username = loggedInUser.getUsername();
                 JsonObject response = Json.createObjectBuilder()
                         .add("action", 2)
@@ -150,32 +143,19 @@ public class ClientHandler extends Thread {
                 .add("message", message)
                 .build();
         dos.writeUTF(errorResponse.toString());
-                JsonObject errorResponse = Json.createObjectBuilder()
-                        .add("action", 2)
-                        .add("status", "failure")
-                        .add("message", "Invalid username or password")
-                        .build();
-                dos.writeUTF(errorResponse.toString());
-
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
     }
 
     private void handelLogout(JsonObject json) throws IOException {
         String username = json.getString("username");
-            User user = new User(username, false,false);
-            userDao.logOut(user);
-     JsonObject response = Json.createObjectBuilder()
-                        .add("action", 6)
-                        .add("status", "success")
-                        .build();
+        User user = new User(username, false, false);
+        userDao.logOut(user);
+        JsonObject response = Json.createObjectBuilder()
+                .add("action", 6)
+                .add("status", "success")
+                .build();
         dos.writeUTF(response.toString());
-            
-            
-     }
 
+    }
 
     private void handleSendInvitationRequest(JsonObject json) {
         String player1 = json.getString("username-player1");
