@@ -22,6 +22,12 @@ public class User {
         this.email = email;
         this.password = password;
     }
+
+    public User(String username, boolean isOnline, boolean isAvailable) {
+        this.username = username;
+        this.isOnline = isOnline;
+        this.isAvailable = isAvailable;
+    }
     
     
     public User(String email,String password){
