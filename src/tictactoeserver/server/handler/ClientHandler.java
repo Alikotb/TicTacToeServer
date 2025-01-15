@@ -54,6 +54,10 @@ public class ClientHandler extends Thread {
                         handleSendInvitationRequest(json);
                         break;
                     }
+                    case 5: {
+                        handleSendMove(json);
+                        break;
+                    }
                 }
 
             } catch (IOException e) {
@@ -157,6 +161,24 @@ public class ClientHandler extends Thread {
         } else {
 //            dos.writeUTF(); // TODO
             System.out.println("Client didn't receive response");
+        }
+
+    }
+
+    private void handleSendMove(JsonObject json) {
+        DataOutputStream clientDos;
+        if (json.getBoolean("isX")) {
+            clientDos = getClientDos(json.getString("username-player2"));
+        } else {
+            clientDos = getClientDos(json.getString("username-player1"));
+        }
+
+        if (clientDos != null) {
+            try {
+                clientDos.writeUTF(json.toString());
+            } catch (IOException ex) {
+                Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
     }
