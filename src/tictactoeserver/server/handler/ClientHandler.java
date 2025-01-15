@@ -53,11 +53,17 @@ public class ClientHandler extends Thread {
                     case 4: {
                         handleSendInvitationRequest(json);
                         break;
+                       case 6:
+                        handelLogout(json);
+                        break;
                     }
+
                     case 5: {
                         handleSendMove(json);
                         break;
                     }
+
+
                 }
 
             } catch (IOException e) {
@@ -97,6 +103,23 @@ public class ClientHandler extends Thread {
             String email = json.getString("email");
             String password = json.getString("password");
 
+            if (userDao.checkEmail(email) == null) {
+                sendErrorResponse("Invalid email address");
+                return;
+            }
+
+            if (!userDao.checkPassword(email).equals(password)) {
+                sendErrorResponse("Invalid password");
+                return;
+            }
+
+            User user = new User(email, password);
+            User loggedInUser = userDao.updateUser(user);
+
+            if (loggedInUser != null) {
+                loggedInUser.setUsername(userDao.getUserNameByEmail(email));
+                loggedInUser.setScore(userDao.getScoreByEmail(email));
+
             User user = new User(email, password);
             User loggedInUser = userDao.updateUser(user);
             loggedInUser.setUsername(userDao.getUserNameByEmail(email));
@@ -109,9 +132,24 @@ public class ClientHandler extends Thread {
                         .add("status", "success")
                         .add("username", loggedInUser.getUsername())
                         .add("score", loggedInUser.getScore())
+                        .add("message", "success")
                         .build();
                 dos.writeUTF(response.toString());
             } else {
+                sendErrorResponse("Failed to log in the user. Please try again.");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, "Database error", ex);
+        }
+    }
+
+    private void sendErrorResponse(String message) throws IOException {
+        JsonObject errorResponse = Json.createObjectBuilder()
+                .add("action", 2)
+                .add("status", "failure")
+                .add("message", message)
+                .build();
+        dos.writeUTF(errorResponse.toString());
                 JsonObject errorResponse = Json.createObjectBuilder()
                         .add("action", 2)
                         .add("status", "failure")
@@ -124,6 +162,20 @@ public class ClientHandler extends Thread {
             ex.printStackTrace();
         }
     }
+
+    private void handelLogout(JsonObject json) throws IOException {
+        String username = json.getString("username");
+            User user = new User(username, false,false);
+            userDao.logOut(user);
+     JsonObject response = Json.createObjectBuilder()
+                        .add("action", 6)
+                        .add("status", "success")
+                        .build();
+        dos.writeUTF(response.toString());
+            
+            
+     }
+
 
     private void handleSendInvitationRequest(JsonObject json) {
         String player1 = json.getString("username-player1");
