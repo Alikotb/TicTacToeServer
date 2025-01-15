@@ -10,21 +10,21 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
-import tictactoeserver.controller.DashBoardController;
 import tictactoeserver.model.User;
 import tictactoeserver.model.UserDao;
 
 public class ClientHandler extends Thread {
 
+    private String username;
     private static UserDao userDao = UserDao.getInstance();
     private DataInputStream dis;
     private DataOutputStream dos;
     private Socket clientSocket;
-    private static ArrayList<ClientHandler>clients=new ArrayList();
+    private static ArrayList<ClientHandler> clients = new ArrayList();
 
     public ClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
-                    clients.add(this);
+        clients.add(this);
         try {
             dis = new DataInputStream(clientSocket.getInputStream());
             dos = new DataOutputStream(clientSocket.getOutputStream());
@@ -44,14 +44,20 @@ public class ClientHandler extends Thread {
 
                 switch (action) {
                     case 1:
+                        System.out.println("Sign Up Request Case");
                         handelSignupRequest(json);
                         break;
                     case 2:
                         handelLoginRequest(json);
                         break;
+                    case 4: {
+                        handleSendInvitationRequest(json);
+                        break;
+                    }
                 }
 
             } catch (IOException e) {
+                saveResources();
                 stop();
             }
         }
@@ -86,13 +92,14 @@ public class ClientHandler extends Thread {
         try {
             String email = json.getString("email");
             String password = json.getString("password");
-            
+
             User user = new User(email, password);
             User loggedInUser = userDao.updateUser(user);
             loggedInUser.setUsername(userDao.getUserNameByEmail(email));
             loggedInUser.setScore(userDao.getScoreByEmail(email));
-            
+
             if (loggedInUser != null) {
+                username = loggedInUser.getUsername();
                 JsonObject response = Json.createObjectBuilder()
                         .add("action", 2)
                         .add("status", "success")
@@ -107,13 +114,65 @@ public class ClientHandler extends Thread {
                         .add("message", "Invalid username or password")
                         .build();
                 dos.writeUTF(errorResponse.toString());
-                
+
             }
         } catch (SQLException ex) {
-            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
     }
-    
+
+    private void handleSendInvitationRequest(JsonObject json) {
+        String player1 = json.getString("username-player1");
+        String player2 = json.getString("username-player2");
+        int status = json.getInt("status");
+
+        // TODO check if user is online and available
+        DataOutputStream clientDos;
+        if (status == 2) {
+            clientDos = getClientDos(player1);
+        } else {
+            clientDos = getClientDos(player2);
+        }
+
+        if (clientDos != null) {
+            try {
+
+                if (status == 2) { // player 2 accepted invitation
+                    System.out.println("Server / player 2 accepted invitation");
+                    String jsonStartGame = Json.createObjectBuilder()
+                            .add("action", 4)
+                            .add("status", 4) // declined
+                            .add("username-player2", player2)
+                            .add("username-player1", player1)
+                            .add("score-player1", json.getInt("score-player1"))
+                            .add("score-player2", json.getInt("score-player2"))
+                            .build().toString();
+                    dos.writeUTF(jsonStartGame);
+                }
+                clientDos.writeUTF(json.toString());
+                System.out.println("Client receive response");
+            } catch (IOException ex) {
+                // TODO couldn't invite response to client
+            }
+        } else {
+//            dos.writeUTF(); // TODO
+            System.out.println("Client didn't receive response");
+        }
+
+    }
+
+    private DataOutputStream getClientDos(String username) {
+        for (ClientHandler c : clients) {
+            System.out.print(c.username + ", ");
+
+            if (username.equals(c.username) && !this.username.equals(c.username)) {
+                // TODO username.isavailable() -> true
+                return c.dos;
+            }
+        }
+        return null;
+    }
+
     public static void getAvailableUsers() throws IOException {
         JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
         for (User user : userDao.getAvailableUsers()) {
@@ -126,22 +185,24 @@ public class ClientHandler extends Thread {
         JsonArray jsonArray = arrayBuilder.build();
         JsonObject errorResponse = Json.createObjectBuilder()
                 .add("action", 3)
-                .add("items", jsonArray)  
+                .add("items", jsonArray)
                 .build();
         for (ClientHandler client : clients) {
-                client.dos.writeUTF(errorResponse.toString());
+            client.dos.writeUTF(errorResponse.toString());
         }
-    
+
     }
+
     private void saveResources() {
         try {
             dis.close();
             dos.close();
             clientSocket.close();
+
         } catch (IOException ex) {
-            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ClientHandler.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
 
     }
-
 }
