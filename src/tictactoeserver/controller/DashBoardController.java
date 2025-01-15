@@ -63,7 +63,7 @@ public class DashBoardController extends DashBoard {
             server.stop();
             serverThread.stop();
         }
-
+        
         Platform.runLater(() -> {
             btnController.setText("Restart Server");
             btnController.setStyle("-fx-background-color: orange;-fx-text-fill: white;");
