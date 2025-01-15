@@ -144,6 +144,31 @@ public class UserDao {
         }
         return 0;
     }
+
+     
+      public String checkEmail(String email) throws SQLException {
+        String loginQuery = "SELECT EMAIL FROM USER_TABLE WHERE EMAIL = ? ";
+        stmt = con.prepareStatement(loginQuery);
+        stmt.setString(1, email);
+        ResultSet result = stmt.executeQuery();
+        if (result.next()) {
+             return result.getString(1);
+            
+        }
+        return null;
+    }
+     
+      public String checkPassword(String email) throws SQLException {
+        String loginQuery = "SELECT PASSWORD FROM USER_TABLE WHERE EMAIL = ? ";
+        stmt = con.prepareStatement(loginQuery);
+        stmt.setString(1, email);
+        ResultSet result = stmt.executeQuery();
+        if (result.next()) {
+             return result.getString("PASSWORD");
+            
+        }
+        return null;
+
     public void logOut(User user) {
         try {
             String updateQuery = "UPDATE USER_TABLE SET ISONLINE = ?, ISAVAILABLE = ? WHERE USERNAME = ?";
