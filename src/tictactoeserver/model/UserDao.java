@@ -144,5 +144,17 @@ public class UserDao {
         }
         return 0;
     }
+    public void logOut(User user) {
+        try {
+            String updateQuery = "UPDATE USER_TABLE SET ISONLINE = ?, ISAVAILABLE = ? WHERE USERNAME = ?";
+            stmt = con.prepareStatement(updateQuery);
+            stmt.setBoolean(1, false);
+            stmt.setBoolean(2, false);
+            stmt.setString(3, user.getUsername());
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
 }

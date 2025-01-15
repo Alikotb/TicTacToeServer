@@ -53,7 +53,11 @@ public class ClientHandler extends Thread {
                     case 4: {
                         handleSendInvitationRequest(json);
                         break;
+                       case 6:
+                        handelLogout(json);
+                        break;
                     }
+
                 }
 
             } catch (IOException e) {
@@ -120,6 +124,20 @@ public class ClientHandler extends Thread {
             ex.printStackTrace();
         }
     }
+
+    private void handelLogout(JsonObject json) throws IOException {
+        String username = json.getString("username");
+            User user = new User(username, false,false);
+            userDao.logOut(user);
+     JsonObject response = Json.createObjectBuilder()
+                        .add("action", 6)
+                        .add("status", "success")
+                        .build();
+        dos.writeUTF(response.toString());
+            
+            
+     }
+
 
     private void handleSendInvitationRequest(JsonObject json) {
         String player1 = json.getString("username-player1");
