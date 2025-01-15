@@ -22,6 +22,7 @@ public class Server {
         } catch (IOException e) {
                 e.printStackTrace();  
         } finally {
+            System.out.println("finally");
             stop();
         }
     }
