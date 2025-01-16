@@ -160,41 +160,74 @@ public class ClientHandler extends Thread {
     private void handleSendInvitationRequest(JsonObject json) {
         String player1 = json.getString("username-player1");
         String player2 = json.getString("username-player2");
-        int status = json.getInt("status");
+        int status = json.getInt("status");     // 1
+        int code = 0;
 
-        // TODO check if user is online and available
-        DataOutputStream clientDos;
         if (status == 2) {
-            clientDos = getClientDos(player1);
-        } else {
-            clientDos = getClientDos(player2);
+            DataOutputStream clientDos = null;
+            if (isAvailable(player1)) {
+                code = 1;
+                clientDos = getClientDos(player1);
+                userDao.setIsNotAvailable(player2);
+            } else if (isOnline(player1)) {
+                code = 2;
+            } else {
+                code = 3;
+            }
+            String jsonStartGame = createJsonForAcceptResponse(player2, player1, json, code);
+            sendAcceptResponse(json, clientDos, jsonStartGame);
+        } else if (status == 3) {
+            sendResponse(player1, json);
+        } else {    // 1
+            sendResponse(player2, json);
         }
 
+    }
+
+    private static boolean isOnline(String player1) {
+        return !userDao.isAvailable(player1) && userDao.isOnline(player1);
+    }
+
+    private static boolean isAvailable(String player1) {
+        return userDao.isAvailable(player1) && userDao.isOnline(player1);
+    }
+
+    private String createJsonForAcceptResponse(String player2, String player1, JsonObject json, int code) {
+        String jsonStartGame = Json.createObjectBuilder()
+                .add("action", 4)
+                .add("status", 4)
+                .add("username-player2", player2)
+                .add("username-player1", player1)
+                .add("score-player1", json.getInt("score-player1"))
+                .add("score-player2", json.getInt("score-player2"))
+                .add("code", code)
+                .build().toString();
+        return jsonStartGame;
+    }
+
+    private void sendResponse(String player2, JsonObject json) {
+        DataOutputStream clientDos = getClientDos(player2);
+        try {
+            clientDos.writeUTF(json.toString());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void sendAcceptResponse(JsonObject json, DataOutputStream clientDos, String jsonStartGame) {
+        try {
+            dos.writeUTF(jsonStartGame);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
         if (clientDos != null) {
             try {
-
-                if (status == 2) { // player 2 accepted invitation
-                    System.out.println("Server / player 2 accepted invitation");
-                    String jsonStartGame = Json.createObjectBuilder()
-                            .add("action", 4)
-                            .add("status", 4) // declined
-                            .add("username-player2", player2)
-                            .add("username-player1", player1)
-                            .add("score-player1", json.getInt("score-player1"))
-                            .add("score-player2", json.getInt("score-player2"))
-                            .build().toString();
-                    dos.writeUTF(jsonStartGame);
-                }
                 clientDos.writeUTF(json.toString());
-                System.out.println("Client receive response");
+                userDao.setIsNotAvailable(json.getString("username-player1"));
             } catch (IOException ex) {
-                // TODO couldn't invite response to client
+                ex.printStackTrace();
             }
-        } else {
-//            dos.writeUTF(); // TODO
-            System.out.println("Client didn't receive response");
         }
-
     }
 
     private void handleSendMove(JsonObject json) {
@@ -217,10 +250,8 @@ public class ClientHandler extends Thread {
 
     private DataOutputStream getClientDos(String username) {
         for (ClientHandler c : clients) {
-            System.out.print(c.username + ", ");
 
             if (username.equals(c.username) && !this.username.equals(c.username)) {
-                // TODO username.isavailable() -> true
                 return c.dos;
             }
         }

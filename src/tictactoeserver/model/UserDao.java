@@ -182,4 +182,48 @@ public class UserDao {
         }
     }
 
+    public boolean isAvailable(String username) {
+        try {
+            String query = "SELECT ISAVAILABLE FROM USER_TABLE WHERE USERNAME = ? AND ISAVAILABLE = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setString(1, username);
+            stmt.setBoolean(2, true);
+            ResultSet res = stmt.executeQuery();
+            return res.next();
+        } catch (SQLException ex) {
+            Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, "UserName Not Available", ex);
+            return false;
+        }
+
+    }
+
+    public boolean isOnline(String username) {
+        try {
+            String query = "SELECT ISONLINE FROM USER_TABLE WHERE USERNAME = ? AND ISONLINE = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setString(1, username);
+            stmt.setBoolean(2, true);
+            ResultSet res = stmt.executeQuery();
+            return res.next();
+        } catch (SQLException ex) {
+            Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, "UserName Not Online", ex);
+            return false;
+        }
+    }
+    
+    
+    public boolean setIsNotAvailable(String username) {
+        try {
+            String query = "UPDATE USER_TABLE SET ISAVAILABLE = ? WHERE USERNAME = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setBoolean(1, false);
+            stmt.setString(2, username);
+            int res = stmt.executeUpdate();
+            return res > 0;
+        } catch (SQLException ex) {
+            Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, "isAvailable is Not Updated", ex);
+            return false;
+        }
+    }
+
 }
