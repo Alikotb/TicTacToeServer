@@ -28,11 +28,13 @@ public class UserDao {
     }
 
     static {
+
         try {
             DriverManager.registerDriver(new ClientDriver());
             con = DriverManager.getConnection("jdbc:derby://localhost:1527/tictactoe_db", "root", "root");
+
         } catch (SQLException ex) {
-            Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Disconnection with Database.");
         }
     }
 
@@ -99,19 +101,23 @@ public class UserDao {
 
     public static int[] getOnlineUsers() {
         int[] counter = {0, 0};
-        try {
-            stmt = con.prepareStatement("SELECT COUNT(*) FROM USER_TABLE WHERE ISONLINE = TRUE");
-            result = stmt.executeQuery();
-            if (result.next()) {
-                counter[0] = result.getInt(1);
+        if (con == null) {
+            System.out.println("Don't get Online Users,Database is Disconnection");
+        } else {
+            try {
+                stmt = con.prepareStatement("SELECT COUNT(*) FROM USER_TABLE WHERE ISONLINE = TRUE");
+                result = stmt.executeQuery();
+                if (result.next()) {
+                    counter[0] = result.getInt(1);
+                }
+                stmt = con.prepareStatement("SELECT COUNT(*) FROM USER_TABLE WHERE ISONLINE = FALSE");
+                result = stmt.executeQuery();
+                if (result.next()) {
+                    counter[1] = result.getInt(1);
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, null, ex);
             }
-            stmt = con.prepareStatement("SELECT COUNT(*) FROM USER_TABLE WHERE ISONLINE = FALSE");
-            result = stmt.executeQuery();
-            if (result.next()) {
-                counter[1] = result.getInt(1);
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, null, ex);
         }
         return counter;
     }
@@ -119,17 +125,20 @@ public class UserDao {
     public ArrayList<User> getAvailableUsers() {
         ArrayList<User> users = new ArrayList();
         User user;
-        try {
-            stmt = con.prepareStatement("SELECT USERNAME,SCORE FROM USER_TABLE WHERE ISAVAILABLE = TRUE");
-            result = stmt.executeQuery();
-            while (result.next()) {
-                user = new User(result.getString("USERNAME"), result.getInt("SCORE"));
-                users.add(user);
+        if (con == null) {
+            System.out.println("Don't get Available Users,Database is Disconnection");
+        } else {
+            try {
+                stmt = con.prepareStatement("SELECT USERNAME,SCORE FROM USER_TABLE WHERE ISAVAILABLE = TRUE");
+                result = stmt.executeQuery();
+                while (result.next()) {
+                    user = new User(result.getString("USERNAME"), result.getInt("SCORE"));
+                    users.add(user);
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, null, ex);
         }
-
         return users;
     }
 
@@ -210,8 +219,7 @@ public class UserDao {
             return false;
         }
     }
-    
-    
+
     public boolean setIsNotAvailable(String username) {
         try {
             String query = "UPDATE USER_TABLE SET ISAVAILABLE = ? WHERE USERNAME = ?";

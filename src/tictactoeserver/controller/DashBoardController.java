@@ -77,7 +77,7 @@ public class DashBoardController extends DashBoard {
             while (true) {
                 try {
                     availableUsers = uDao.getAvailableUsers();
-                    ClientHandler.getAvailableUsers();
+                    ClientHandler.sendAvailableUsers();
                     ar[0] = UserDao.getOnlineUsers()[0];
                     ar[1] = UserDao.getOnlineUsers()[1];
                     Platform.runLater(() -> {
@@ -87,9 +87,8 @@ public class DashBoardController extends DashBoard {
 
                 } catch (InterruptedException ex) {
                     Logger.getLogger(DashBoardController.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IOException ex) {
-                    Logger.getLogger(DashBoardController.class.getName()).log(Level.SEVERE, null, ex);
-                }
+               updateChart.stop();
+                } 
             }
 
         });
@@ -97,37 +96,18 @@ public class DashBoardController extends DashBoard {
     }
 
     public void updateGraph() {
-    //dataSeries1.getData().clear();
 
         dataSeries1.getData().add(new XYChart.Data("Online", ar[0]));
         dataSeries1.getData().add(new XYChart.Data("Offline", ar[1]));
     }
 
-// public void updateGraph() {
-//    if (dataSeries1.getData().isEmpty()) {
-//        // Initialize the chart with data points if empty
-//        dataSeries1.getData().add(new XYChart.Data<>("Online", ar[0]));
-//        dataSeries1.getData().add(new XYChart.Data<>("Offline", ar[1]));
-//    } else {
-//        // Update the existing data points by replacing them
-//        dataSeries1.getData().set(0, new XYChart.Data<>("Online", ar[0])); // Update "Online"
-//        dataSeries1.getData().set(1, new XYChart.Data<>("Offline", ar[1])); // Update "Offline"
-//    }
-//}
-    
-//    private void stopBarChart() {
-//        updateChart.stop();
-//        server.stop();
-//        Platform.runLater(() -> {
-//            updateGraph();
-//        });
-//    }
+
     
     
     private void stopBarChart() {
-    running = false; // Signal the thread to stop
+    running = false; 
     if (updateChart != null && updateChart.isAlive()) {
-        updateChart.interrupt(); // Interrupt the thread if it's sleeping
+        updateChart.stop(); 
     }
 }
 

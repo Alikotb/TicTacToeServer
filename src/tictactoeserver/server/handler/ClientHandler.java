@@ -258,7 +258,7 @@ public class ClientHandler extends Thread {
         return null;
     }
 
-    public static void getAvailableUsers() throws IOException {
+    public static void sendAvailableUsers()  {
         JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
         for (User user : userDao.getAvailableUsers()) {
             JsonObject userJson = Json.createObjectBuilder()
@@ -273,7 +273,11 @@ public class ClientHandler extends Thread {
                 .add("items", jsonArray)
                 .build();
         for (ClientHandler client : clients) {
-            client.dos.writeUTF(errorResponse.toString());
+            try {
+                client.dos.writeUTF(errorResponse.toString());
+            } catch (IOException ex) {
+                Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
     }
