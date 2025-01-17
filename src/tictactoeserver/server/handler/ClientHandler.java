@@ -40,6 +40,7 @@ public class ClientHandler extends Thread {
 
             if (clientSocket.isClosed()) {
                 clients.remove(this);
+                handelLogout(username);
                 interrupt();
             }
 
@@ -64,7 +65,8 @@ public class ClientHandler extends Thread {
                         break;
                     }
                     case 6: {
-                        handelLogout(json);
+                        String username = json.getString("username");
+                        handelLogout(username);
                         break;
                     }
 
@@ -149,15 +151,18 @@ public class ClientHandler extends Thread {
         dos.writeUTF(errorResponse.toString());
     }
 
-    private void handelLogout(JsonObject json) throws IOException {
-        String username = json.getString("username");
-        User user = new User(username, false, false);
-        userDao.logOut(user);
-        JsonObject response = Json.createObjectBuilder()
-                .add("action", 6)
-                .add("status", "success")
-                .build();
-        dos.writeUTF(response.toString());
+    private void handelLogout(String username) {
+        try {
+            User user = new User(username, false, false);
+            userDao.logOut(user);
+            JsonObject response = Json.createObjectBuilder()
+                    .add("action", 6)
+                    .add("status", "success")
+                    .build();
+            dos.writeUTF(response.toString());
+        } catch (IOException ex) {
+            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
     }
 
