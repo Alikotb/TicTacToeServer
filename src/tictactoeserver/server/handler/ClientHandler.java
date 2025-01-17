@@ -20,7 +20,7 @@ public class ClientHandler extends Thread {
     private DataInputStream dis;
     private DataOutputStream dos;
     private Socket clientSocket;
-    private static ArrayList<ClientHandler> clients = new ArrayList();
+    public static ArrayList<ClientHandler> clients = new ArrayList();
 
     public ClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -36,7 +36,14 @@ public class ClientHandler extends Thread {
 
     @Override
     public void run() {
-        while (true) {
+        while (!isInterrupted()) {
+
+            if (clientSocket.isClosed()) {
+                clients.remove(this);
+                handelLogout(username);
+                interrupt();
+            }
+
             try {
                 String request = dis.readUTF();
                 JsonObject json = Json.createReader(new StringReader(request)).readObject();
@@ -44,7 +51,6 @@ public class ClientHandler extends Thread {
 
                 switch (action) {
                     case 1:
-                        System.out.println("Sign Up Request Case");
                         handelSignupRequest(json);
                         break;
                     case 2:
@@ -59,7 +65,8 @@ public class ClientHandler extends Thread {
                         break;
                     }
                     case 6: {
-                        handelLogout(json);
+                        String username = json.getString("username");
+                        handelLogout(username);
                         break;
                     }
 
@@ -67,7 +74,6 @@ public class ClientHandler extends Thread {
 
             } catch (IOException e) {
                 saveResources();
-                stop();
             }
         }
     }
@@ -145,15 +151,18 @@ public class ClientHandler extends Thread {
         dos.writeUTF(errorResponse.toString());
     }
 
-    private void handelLogout(JsonObject json) throws IOException {
-        String username = json.getString("username");
-        User user = new User(username, false, false);
-        userDao.logOut(user);
-        JsonObject response = Json.createObjectBuilder()
-                .add("action", 6)
-                .add("status", "success")
-                .build();
-        dos.writeUTF(response.toString());
+    private void handelLogout(String username) {
+        try {
+            User user = new User(username, false, false);
+            userDao.logOut(user);
+            JsonObject response = Json.createObjectBuilder()
+                    .add("action", 6)
+                    .add("status", "success")
+                    .build();
+            dos.writeUTF(response.toString());
+        } catch (IOException ex) {
+            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
     }
 
