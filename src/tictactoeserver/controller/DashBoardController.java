@@ -21,6 +21,7 @@ public class DashBoardController extends DashBoard {
     private boolean running;
     private static ArrayList<User> availableUsers = new ArrayList();
     UserDao uDao;
+    public static int[] ar = {0, 0};
 
     public DashBoardController(Stage stage) {
         uDao = UserDao.getInstance();
@@ -63,7 +64,7 @@ public class DashBoardController extends DashBoard {
             server.stop();
             serverThread.stop();
         }
-        
+
         Platform.runLater(() -> {
             btnController.setText("Restart Server");
             btnController.setStyle("-fx-background-color: orange;-fx-text-fill: white;");
@@ -71,7 +72,7 @@ public class DashBoardController extends DashBoard {
     }
 
     private void startBarchart() {
-        int[] ar = {0, 0};
+
         updateChart = new Thread(() -> {
             while (true) {
                 try {
@@ -80,7 +81,7 @@ public class DashBoardController extends DashBoard {
                     ar[0] = UserDao.getOnlineUsers()[0];
                     ar[1] = UserDao.getOnlineUsers()[1];
                     Platform.runLater(() -> {
-                        updateGraph(ar[0], ar[1]);
+                        updateGraph();
                     });
                     Thread.sleep(3000);
 
@@ -95,19 +96,40 @@ public class DashBoardController extends DashBoard {
         updateChart.start();
     }
 
-    public void updateGraph(int online, int offline) {
+    public void updateGraph() {
+    //dataSeries1.getData().clear();
 
-        dataSeries1.getData().add(new XYChart.Data("Online", online));
-        dataSeries1.getData().add(new XYChart.Data("Offline", offline));
+        dataSeries1.getData().add(new XYChart.Data("Online", ar[0]));
+        dataSeries1.getData().add(new XYChart.Data("Offline", ar[1]));
     }
 
+// public void updateGraph() {
+//    if (dataSeries1.getData().isEmpty()) {
+//        // Initialize the chart with data points if empty
+//        dataSeries1.getData().add(new XYChart.Data<>("Online", ar[0]));
+//        dataSeries1.getData().add(new XYChart.Data<>("Offline", ar[1]));
+//    } else {
+//        // Update the existing data points by replacing them
+//        dataSeries1.getData().set(0, new XYChart.Data<>("Online", ar[0])); // Update "Online"
+//        dataSeries1.getData().set(1, new XYChart.Data<>("Offline", ar[1])); // Update "Offline"
+//    }
+//}
+    
+//    private void stopBarChart() {
+//        updateChart.stop();
+//        server.stop();
+//        Platform.runLater(() -> {
+//            updateGraph();
+//        });
+//    }
+    
+    
     private void stopBarChart() {
-        updateChart.stop();
-        server.stop();
-        Platform.runLater(() -> {
-            updateGraph(0, 0);
-        });
+    running = false; // Signal the thread to stop
+    if (updateChart != null && updateChart.isAlive()) {
+        updateChart.interrupt(); // Interrupt the thread if it's sleeping
     }
+}
 
     public static ArrayList<User> getAvailableUsers() {
         return availableUsers;
