@@ -38,20 +38,42 @@ public class UserDao {
         }
     }
 
-    public boolean signup(User user) {
+    public String signup(User user) {
         try {
-            String query = "INSERT INTO USER_TABLE (USERNAME, EMAIL, PASSWORD) VALUES (?, ?, ?)";
-            stmt = con.prepareStatement(query);
+            String checkQuery = "SELECT EMAIL, USERNAME FROM USER_TABLE WHERE EMAIL = ? OR USERNAME = ?";
+            stmt = con.prepareStatement(checkQuery);
+            stmt.setString(1, user.getEmail());
+            stmt.setString(2, user.getUsername());
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                String existingEmail = rs.getString("EMAIL");
+                String existingUsername = rs.getString("USERNAME");
+
+                if (existingUsername != null && existingUsername.equalsIgnoreCase(user.getUsername())) {
+                    return "Username already exists.";
+                }
+                
+                if (existingEmail != null && existingEmail.equalsIgnoreCase(user.getEmail())) {
+                    return "Email already exists.";
+                }
+                
+            }
+
+            String insertQuery = "INSERT INTO USER_TABLE (USERNAME, EMAIL, PASSWORD) VALUES (?, ?, ?)";
+            stmt = con.prepareStatement(insertQuery);
             stmt.setString(1, user.getUsername());
             stmt.setString(2, user.getEmail());
             stmt.setString(3, user.getPassword());
+
             if (stmt.executeUpdate() > 0) {
-                return true;
+                return "success";
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
+            return "Server error occurred during signup.";
         }
-        return false;
+        return "Signup failed for unknown reasons.";
     }
 
     public User updateUser(User user) {
@@ -177,16 +199,18 @@ public class UserDao {
         }
         return null;
     }
-    
+
     public boolean updateScore(String username, int newScore) throws SQLException {
-    String query = "UPDATE USER_TABLE SET SCORE = ? WHERE USERNAME = ?";
+        String query = "UPDATE USER_TABLE SET SCORE = ? WHERE USERNAME = ?";
         stmt = con.prepareStatement(query);
         stmt.setInt(1, newScore);
         stmt.setString(2, username);
-        if(stmt.executeUpdate() > 0) return true;
-        else return false;
+        if (stmt.executeUpdate() > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
-
 
     public void logOut(User user) {
         try {
