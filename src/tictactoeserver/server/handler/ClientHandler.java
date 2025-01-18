@@ -73,9 +73,8 @@ public class ClientHandler extends Thread {
                     case 7: {
                         handleScoreUpdateRequest(json);
                         break;
-                    
+
                     }
-                    
 
                 }
 
@@ -89,25 +88,27 @@ public class ClientHandler extends Thread {
         String username = json.getString("username");
         String email = json.getString("email");
         String password = json.getString("password");
-        User user = new User(username, email, password);
-        boolean signupStatus = userDao.signup(user);
 
-        if (signupStatus) {
-            JsonObject response = Json.createObjectBuilder()
+        User user = new User(username, email, password);
+        String signupStatus = userDao.signup(user); 
+
+        JsonObject response;
+
+        if ("success".equalsIgnoreCase(signupStatus)) {
+            response = Json.createObjectBuilder()
                     .add("action", 1)
                     .add("status", "success")
                     .add("message", "Signed up successfully.")
                     .build();
-            dos.writeUTF(response.toString());
         } else {
-            JsonObject response = Json.createObjectBuilder()
+            response = Json.createObjectBuilder()
                     .add("action", 1)
                     .add("status", "failure")
-                    .add("message", "Signup failed.")
+                    .add("message", signupStatus) 
                     .build();
-            dos.writeUTF(response.toString());
         }
 
+        dos.writeUTF(response.toString()); 
     }
 
     private void handelLoginRequest(JsonObject json) throws IOException {
@@ -274,7 +275,7 @@ public class ClientHandler extends Thread {
         return null;
     }
 
-    public static void sendAvailableUsers()  {
+    public static void sendAvailableUsers() {
         JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
         for (User user : userDao.getAvailableUsers()) {
             JsonObject userJson = Json.createObjectBuilder()
@@ -297,29 +298,27 @@ public class ClientHandler extends Thread {
         }
 
     }
-    
-    private void handleScoreUpdateRequest(JsonObject json){
+
+    private void handleScoreUpdateRequest(JsonObject json) {
         try {
             String username = json.getString("username");
             int newScore = json.getInt("score");
-            
+
             boolean updateStatus = userDao.updateScore(username, newScore);
-           JsonObject response = Json.createObjectBuilder()
-                .add("action", 7)
-                .add("status", updateStatus ? "success" : "failure")
-                .build();
+            JsonObject response = Json.createObjectBuilder()
+                    .add("action", 7)
+                    .add("status", updateStatus ? "success" : "failure")
+                    .build();
             try {
                 dos.writeUTF(response.toString());
             } catch (IOException ex) {
                 Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-         
+
         } catch (SQLException ex) {
             Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
-    
-    
+
     }
 
     private void saveResources() {
