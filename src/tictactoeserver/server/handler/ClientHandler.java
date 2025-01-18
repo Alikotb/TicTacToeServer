@@ -75,7 +75,11 @@ public class ClientHandler extends Thread {
                         break;
 
                     }
-
+                    case 8:{
+                    handleIsAvailableRequest(json);
+                    break;
+                    }
+                    
                 }
 
             } catch (IOException e) {
@@ -318,7 +322,21 @@ public class ClientHandler extends Thread {
         } catch (SQLException ex) {
             Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+    }
+    
+    private void handleIsAvailableRequest(JsonObject json){
+            String username = json.getString("username");
+            boolean updateStatus = userDao.setIsAvailable(username);
+           JsonObject response = Json.createObjectBuilder()
+                .add("action", 8)
+                .add("status", updateStatus ? "success" : "failure")
+                .build();
+            try {
+                dos.writeUTF(response.toString());
+            } catch (IOException ex) {
+                Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+           
     }
 
     private void saveResources() {

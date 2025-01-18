@@ -267,5 +267,21 @@ public class UserDao {
             return false;
         }
     }
+    
+     public boolean setIsAvailable(String username) {
+        try {
+            String query = "UPDATE USER_TABLE SET ISAVAILABLE = ? WHERE USERNAME = ?";
+            stmt = con.prepareStatement(query);
+            stmt.setBoolean(1, true);
+            stmt.setString(2, username);
+            int res = stmt.executeUpdate();
+            return res > 0;
+        } catch (SQLException ex) {
+            Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, "isAvailable is Not Updated", ex);
+            return false;
+        }
+    }
+    
+    
 
 }
