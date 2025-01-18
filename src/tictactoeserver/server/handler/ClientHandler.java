@@ -31,7 +31,6 @@ public class ClientHandler extends Thread {
             dos = new DataOutputStream(clientSocket.getOutputStream());
         } catch (IOException ex) {
             Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-
         }
     }
 
@@ -41,7 +40,8 @@ public class ClientHandler extends Thread {
 
             if (clientSocket.isClosed()) {
                 clients.remove(this);
-                handelLogout(username);
+                User user = new User(username, false, false);
+                userDao.logOut(user);
                 interrupt();
             }
 
@@ -90,7 +90,7 @@ public class ClientHandler extends Thread {
         String password = json.getString("password");
 
         User user = new User(username, email, password);
-        String signupStatus = userDao.signup(user); 
+        String signupStatus = userDao.signup(user);
 
         JsonObject response;
 
@@ -104,11 +104,11 @@ public class ClientHandler extends Thread {
             response = Json.createObjectBuilder()
                     .add("action", 1)
                     .add("status", "failure")
-                    .add("message", signupStatus) 
+                    .add("message", signupStatus)
                     .build();
         }
 
-        dos.writeUTF(response.toString()); 
+        dos.writeUTF(response.toString());
     }
 
     private void handelLoginRequest(JsonObject json) throws IOException {
