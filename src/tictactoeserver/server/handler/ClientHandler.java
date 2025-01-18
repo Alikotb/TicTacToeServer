@@ -1,6 +1,7 @@
 package tictactoeserver.server.handler;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -69,6 +70,12 @@ public class ClientHandler extends Thread {
                         handelLogout(username);
                         break;
                     }
+                    case 7: {
+                        handleScoreUpdateRequest(json);
+                        break;
+                    
+                    }
+                    
 
                 }
 
@@ -289,6 +296,30 @@ public class ClientHandler extends Thread {
             }
         }
 
+    }
+    
+    private void handleScoreUpdateRequest(JsonObject json){
+        try {
+            String username = json.getString("username");
+            int newScore = json.getInt("score");
+            
+            boolean updateStatus = userDao.updateScore(username, newScore);
+           JsonObject response = Json.createObjectBuilder()
+                .add("action", 7)
+                .add("status", updateStatus ? "success" : "failure")
+                .build();
+            try {
+                dos.writeUTF(response.toString());
+            } catch (IOException ex) {
+                Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+         
+        } catch (SQLException ex) {
+            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    
+    
     }
 
     private void saveResources() {
