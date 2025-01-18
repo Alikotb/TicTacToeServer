@@ -168,6 +168,16 @@ public class UserDao {
         }
         return null;
     }
+    
+    public boolean updateScore(String username, int newScore) throws SQLException {
+    String query = "UPDATE USER_TABLE SET SCORE = ? WHERE USERNAME = ?";
+        stmt = con.prepareStatement(query);
+        stmt.setInt(1, newScore);
+        stmt.setString(2, username);
+        if(stmt.executeUpdate() > 0) return true;
+        else return false;
+    }
+
 
     public void logOut(User user) {
         try {
