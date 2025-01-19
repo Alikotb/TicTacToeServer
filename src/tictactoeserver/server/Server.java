@@ -12,23 +12,20 @@ public class Server {
 
     public void start() {
         try {
-            isRunning = true;
             serverSocket = new ServerSocket(55555);
-            while (isRunning) {
+            while (!Thread.interrupted()) {
                 Socket clientSocket = serverSocket.accept();
                 ClientHandler clientHandler = new ClientHandler(clientSocket);
                 clientHandler.start();
             }
         } catch (IOException e) {
-                e.printStackTrace();  
+            e.printStackTrace();
         } finally {
-            System.out.println("finally");
             stop();
         }
     }
 
     public void stop() {
-        isRunning = false;
         if (serverSocket != null && !serverSocket.isClosed()) {
             try {
                 serverSocket.close();

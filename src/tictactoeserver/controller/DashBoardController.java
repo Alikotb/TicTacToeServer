@@ -1,6 +1,5 @@
 package tictactoeserver.controller;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,14 +54,22 @@ public class DashBoardController extends DashBoard {
             btnController.setStyle("-fx-background-color: red;-fx-text-fill: white;");
         });
         startBarchart();
-
     }
 
     private void stopServer() {
         running = false;
         if (serverThread != null && serverThread.isAlive()) {
+
             server.stop();
-            serverThread.stop();
+            for (ClientHandler client : ClientHandler.clients) {
+                client.saveResources();
+            }
+            try {
+                serverThread.join();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(DashBoardController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            serverThread.interrupt();
         }
 
         Platform.runLater(() -> {
@@ -74,7 +81,7 @@ public class DashBoardController extends DashBoard {
     private void startBarchart() {
 
         updateChart = new Thread(() -> {
-            while (true) {
+            while (!Thread.interrupted()) {
                 try {
                     availableUsers = uDao.getAvailableUsers();
                     ClientHandler.sendAvailableUsers();
@@ -86,9 +93,9 @@ public class DashBoardController extends DashBoard {
                     Thread.sleep(3000);
 
                 } catch (InterruptedException ex) {
+                    updateChart.interrupt();
                     Logger.getLogger(DashBoardController.class.getName()).log(Level.SEVERE, null, ex);
-               updateChart.stop();
-                } 
+                }
             }
 
         });
@@ -101,15 +108,12 @@ public class DashBoardController extends DashBoard {
         dataSeries1.getData().add(new XYChart.Data("Offline", ar[1]));
     }
 
-
-    
-    
     private void stopBarChart() {
-    running = false; 
-    if (updateChart != null && updateChart.isAlive()) {
-        updateChart.stop(); 
+        running = false;
+        if (updateChart != null && updateChart.isAlive()) {
+            updateChart.interrupt();
+        }
     }
-}
 
     public static ArrayList<User> getAvailableUsers() {
         return availableUsers;

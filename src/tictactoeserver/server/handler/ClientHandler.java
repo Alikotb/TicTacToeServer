@@ -181,7 +181,7 @@ public class ClientHandler extends Thread {
     private void handleSendInvitationRequest(JsonObject json) {
         String player1 = json.getString("username-player1");
         String player2 = json.getString("username-player2");
-        int status = json.getInt("status");     // 1
+        int status = json.getInt("status");    
         int code = 0;
 
         if (status == 2) {
@@ -199,7 +199,7 @@ public class ClientHandler extends Thread {
             sendAcceptResponse(json, clientDos, jsonStartGame);
         } else if (status == 3) {
             sendResponse(player1, json);
-        } else {    // 1
+        } else {    
             sendResponse(player2, json);
         }
 
@@ -339,7 +339,7 @@ public class ClientHandler extends Thread {
            
     }
 
-    private void saveResources() {
+    public void saveResources() {
         try {
             dis.close();
             dos.close();
