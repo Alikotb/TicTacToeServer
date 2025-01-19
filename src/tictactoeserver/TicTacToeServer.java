@@ -15,7 +15,8 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import tictactoeserver.ui.Server;
+import tictactoeserver.controller.DashBoardController;
+import tictactoeserver.view.DashBoard;
 
 /**
  *
@@ -25,7 +26,8 @@ public class TicTacToeServer extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = new Server();
+        
+        Parent root = new DashBoardController(stage);
         Scene scene = new Scene(root, 600, 500);
         stage.setScene(scene);
         stage.show();
